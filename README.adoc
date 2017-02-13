@@ -1,21 +1,59 @@
-= Spring Boot / REST / Redis Tutorial 
+= Spring Boot Workshop 
 
 [abstract]
 --
-In this tutorial, we will build a new Java REST application that is backed by Redis. 
+In this workshop, we will build a new Java REST application that is backed by Redis and push to Pivotal Cloud Foundry
 --
 
 == Prerequisites
 *** link:http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[Java 1.8 SDK]
-*** link:http://redis.io/[Redis] 
 *** link:https://spring.io/tools[Spring Tool Suite] or link:https://www.jetbrains.com/idea/[IntelliJ] or link:https://eclipse.org/downloads/[Eclipse] 
 *** link:https://github.com/cloudfoundry/cli/releases[CF CLI]
-*** link:https://maven.apache.org/download.cgi[Apache Maven]
-*** link:http://curl.haxx.se/[Curl]
+*** link:http://curl.haxx.se/[Curl] (Optional)
 
-== Creating the project
+== Part 1: Spring Boot
+link::https://projects.spring.io/spring-boot/[Spring Boot] takes an opinionated view of building production-ready Spring applications. Favoring convention over configuration, it is designed to get you up and running as quickly as possible. 
+
+Spring Boot features include:
+
+* Creates a stand alone runnable jar file which includes everything required to run it
+* Ability to embed Tomcat, Jetty or Undertow making deployment much easier
+* Provide an oopinionated starter dependencies to simplify your configuration
+* Automatically configures Spring whenever possible
+* Provides production ready features such as metrics, health checks and externalized configuration
+* No code generation or XML configuration required
+
+=== Exploring Spring Boot
+
+. Go to link:http://projects.spring.io/spring-boot/[Spring Boot] and explore
++
+image::spring-boot.png[]
++
+
+. How do you find the documentation for a specific version of Spring Boot?
+
+== Part 2: Spring Initializr
+The easiest way to create your Spring Boot applications is to use link:http://start.spring.io[Spring Initialzr]. Spring Initializr makes is very easy to get started. It takes care of setting up your project by creating the necessary folder structure, the required project artifacts along with the dependencies and it creates a build file. By simply entering in some basic information, you can then download a Java project that is ready to be imported into your IDE of your choosing. 
+
+=== Exploring Spring Initializr
+. Go to link:http://start.spring.io[start.spring.io] and explore. 
++
+image::spring-initalizer-0.png[]
++
+Notice the various options that are available. 
++
+. What types of projects can be created?
+. What versions are supported?
+. What happens when you start typing in the Dependencies text box? 
+. What does the full version look like? 
+. What happens when you click on the Generate Project button?
+. How would you change the Java version you are targeting?
+
+== Part 3: Creating the project
+In this seciton we will start the process of creating the application we will use in this workshop. 
+
 . Go to link:http://start.spring.io[start.spring.io]
-. Generate a *Maven Project* with Spring Boot version *1.3.8*
+. Generate a *Maven Project* with Spring Boot version *1.5.1*
 . In the Project Metadata section
 .. Under Group, enter: *io.pivotal.demo* or something similar. This will be your Java package name
 .. Under Artitfact enter: *Spring-Person* or something similar. This will be the name of your Java App
@@ -34,33 +72,47 @@ image::spring-initializer-1.png[]
 ... Cloud Connectors
 .. Scroll down to the *Cloud Discovery section* and select
 ... Cloud Foundry Discovery
+.. Scroll down to the *Ops section* and select
+... Actuator
+... Actuator Docs
 
 .. You are now ready generate the project so click the green "Generate Project" button. This will download your new Java project with the required dependencies for you. The downloaded file will be in a compressed (zip) file containing everything you need. 
 
-== Importing into your IDE
-. Uncompress the zip file to a location of your choosing. Remeber this location as we'll need it shortly.
+=== Importing into your IDE
+. Uncompress the zip file to a location of your choosing. Make sure it keeps the folder structure. Remeber this location as we'll need it shortly.
 . Now start up your favorite Java IDE. Spring Tool Suite, IntelliJ and Eclipse are common choices.
 . The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Maven project. Navigate to the folder and walk through the prompts. Note that the image below is captured from STS / Eclipse. 
 +
 image::sts-import-project.png[Importing Maven Project using STS / Eclipse]
 +
-. Build and Run your application. 
+You might need to wait for the IDE to import the various dependencies. The image below shows the following progress indicator on the lower right portion of the IDE. Note that this is from STS / Eclipse. 
++
+image::waiting-for-import.png[]
+
+== Part 4:Build and Run your application
+
+. Build and Run your application in your IDE
 +
 image::running-in-sts.png[]
 +
 . Hmmm. The application didn't start. Taking a look at the logs note the error:
 +
 ```
-2016-11-11 12:34:28.562 ERROR 66804 --- [           main] o.s.boot.SpringApplication               : Application startup failed
+2017-02-13 14:42:44.617 ERROR 11158 --- [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
 
-org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration': Injection of autowired dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException: Could not autowire field: private javax.sql.DataSource org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration.dataSource; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceAutoConfiguration$NonEmbeddedConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [javax.sql.DataSource]: Factory method 'dataSource' threw exception; nested exception is org.springframework.boot.autoconfigure.jdbc.DataSourceProperties$DataSourceBeanCreationException: Cannot determine embedded database driver class for database type NONE. If you want an embedded database please put a supported one on the classpath. If you have database settings to be loaded from a particular profile you may need to active it (no profiles are currently active).
+***************************
+APPLICATION FAILED TO START
+***************************
 
-(snipped)
+Description:
 
-Caused by: org.springframework.boot.autoconfigure.jdbc.DataSourceProperties$DataSourceBeanCreationException: Cannot determine embedded database driver class for database type NONE. If you want an embedded database please put a supported one on the classpath. If you have database settings to be loaded from a particular profile you may need to active it (no profiles are currently active).
+Cannot determine embedded database driver class for database type NONE
 
+Action:
+
+If you want an embedded database please put a supported one on the classpath. If you have database settings to be loaded from a particular profile you may need to active it (no profiles are currently active).
 ```
-Near the bottom of the stacktrace gives us a clue as to what might be wrong: Cannot determine embedded database driver class for database type NONE. Spring is attempting to instantiate an in-memory database and is not able to do so. 
+The error provides a clue as to what is missing. Spring is attempting to instantiate an in-memory database and is not able to do so. 
 
 To fix this do the following:
 
@@ -86,14 +138,13 @@ This annotation tells Spring to disable auto configuration for Hibernate JPA dat
 . Open a browser to navigate to http://localhost:8080. Notice that by default, the application is protected with Basic Authentication. If you look in the output log, you'll find the password which will look similar to this:
 +
 ```
-2016-11-08 09:37:02.511  INFO 40319 --- [ost-startStop-1] o.s.b.c.e.ServletRegistrationBean        : Mapping servlet: 'dispatcherServlet' to [/]
-2016-11-08 09:37:02.711  INFO 40319 --- [ost-startStop-1] b.a.s.AuthenticationManagerConfiguration : 
+2017-02-13 14:58:42.090  INFO 11406 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2017-02-13 14:58:42.482  INFO 11406 --- [           main] b.a.s.AuthenticationManagerConfiguration : 
 
 Using default security password: xxxxxxxx-yyyy-zzzz-aaaa-bbbbbbbbbbbb 
 
-2016-11-08 09:37:02.760  INFO 40319 --- [ost-startStop-1] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/css/**'], []
-2016-11-08 09:37:02.760  INFO 40319 --- [ost-startStop-1] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/js/**'], []
-
+2017-02-13 14:58:42.522  INFO 11406 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: OrRequestMatcher [], []
+2017-02-13 14:58:42.581  INFO 11406 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration$LazyEndpointPathRequestMatcher@49f3ff41, []
 ```
 +
 . Use *user* as the user name and the password found in your output logs to log in. You'll see the following error:
@@ -104,7 +155,9 @@ So what just happened? We created a spring-initializer project with some depende
 
 The example application that we just ran included Tomcat as an application server because of the choices made when generating the project earlier. 
 
-== Disabling Security
+. What dependencies did spring boot include in the pom.xml file?
+
+=== Disabling Security
 
 Let's disable the need for entering in a user name and password. 
 
@@ -123,9 +176,13 @@ Notice that now you are not prompted to log in to view the website.
 
 So what just happened? We effectively told the Security subsystem not to require security for anything under the top level folder. In a more sophisticated application there would be more rules to define where security is and is not required. 
 
-== Adding Domain Object
+== Part 5: Adding Functionality
 
-Let's continue to enhance our application by adding a domain object. This object represents the information we want to store within a repository later on.
+In this section, we will continue to add additional capabilities to our application. 
+
+=== Adding Domain Object
+
+The first step of enhancing our application is by adding a domain object. This object represents the information we want to store within a repository later on.
 
 . Create a new Java Class called *Person* in the *io.pivotal.demo.domain* package
 . This class will have 3 properties: firstName, lastName, and emailAddress. Use the following code snippet for the class:
@@ -181,7 +238,7 @@ public class Person {
 +
 . Save the file
 
-== Creating a Repostiory
+=== Creating a Repostiory
 
 Next let's create a repository to store the Person information from the Person class we created above. We'll use Redis for this example. Take notice that the constructor of this class requires a RedisTemplate which will be created later on.
 
@@ -291,7 +348,7 @@ public class PersonRepository implements CrudRepository<Person, String> {
 +
 . Save the file
 
-== Creating a Repository Populator
+=== Creating a Repository Populator
 
 Let's create a class that will load data into the repository. This class will hook into the application listener to determine if it should add data to the repository or not. It is meant to boostrap our application with some pre-defined data if necessary.
 
@@ -378,7 +435,7 @@ public class PersonRepositoryPopulator implements ApplicationListener<ContextRef
 +
 . Save the file
 
-== Sample Data
+=== Sample Data
 
 Let's create some sample data to load into the repository.
 
@@ -412,13 +469,14 @@ Let's create some sample data to load into the repository.
 
 The PersonRepositoryPopulator class reads the persons.json, attempts to parse it and if it finds a person array or object, populates the repository with the data, but only if there aren't records already in it.  
 
-== Creating a Redis Configuration
+=== Creating a Redis Configuration
 
 Let's create a Redis Configuration that will be used to create Redis specific entites such as a RedisTemplate which is used to let Redis know how to serialize objects being stored in it.
 
 . Create a new Java Class called *RedisConfig* in the *io.pivotal.demo.config* package
 . Edit the contents of this file to contain the following:
 +
+
 ```
 import io.pivotal.demo.domain.Person;
 import io.pivotal.demo.repository.PersonRepository;
@@ -462,75 +520,35 @@ public class RedisConfig {
 
 This RedisConfig class is used to create a new Person Repository and to define the RedisTemplate for the Person class. One key thing to note is that it uses the @Bean annotation to declare a Spring Bean. A Spring Bean is an object that is instantiated, assembled and managed by Spring's Inversion of Control (IoC) container, allowing for Dependency Injection (DI). Note too that this class needs a _RedisConnectionFactory_ which we have not yet defined. 
 
-== Creating a Local Redis Configuration
+=== Adding Cloud Configuration
 
-Since our goal is to run this application locally as well as in Pivotal Cloud Foundry, let's create a configuration for redis that we can use locally on our development machines. This class will define a Bean called _RedisConnectionFactory_ that our previous class needs.
+It's time to look at what it will take to deploy it to Pivotal Cloud Foundry. We need to add a configuration profile for a cloud deployment. Let's do that now:
 
-. Create a new Java Class called *RedisLocalConfig* in the *io.pivotal.demo.config* package
+. Create a new Java Class called *RedisCloudConfig* in the *io.pivotal.demo.config* package
 . Edit the contents of this file to contain the following:
 +
 ```
+import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
 @Configuration
-@Profile("default")
-public class RedisLocalConfig {
+@Profile("cloud")
+public class RedisCloudConfig extends AbstractCloudConfig {
 
-	@Bean 
+	@Bean
 	public RedisConnectionFactory redisConnection()
 	{
-		return new JedisConnectionFactory();
+		return connectionFactory().redisConnectionFactory();
 	}
 }
 ```
 +
-. Save the file
+What does this class do? It uses a Spring @Profile attribute to indicate that this class should only be instanciated when "cloud" is defined. When you run an application in Pivotal Cloud Foundry, this profile is automatically enabled. You can also specify which profile you want to run by setting the spring.profiles.active environment variable if you want to use something other than cloud.
 
-Note that this class uses a @Profile annotation to take advantage of Spring Profiles. Spring Profiles provide a way to segregate parts of your application configuration and make it only available in certain environments. In this case, we are using the default profile to inform Spring to run this configuration, which connects to a local Redis server. 
-
-== Run the application
-
-Let's run the application and test what we have done so far. Since we are running this locally, we need to make sure we have Redis up and running. To run on a mac use the following command:
-
-```
-$ redis-server /usr/local/etc/redis.conf
-```
-For other operating systems, consult the documentation.
-
-To test that the redis server is up and running run the following command:
-
-```
-$ redis-cli ping
-PONG
-```
-If it comes back with PONG the Redis server is running 
-
-. Run your application
-. Look at the application logs and verify that you do not have any errors. The snippet below shows the application is running.
-
-```
-2016-11-11 13:06:51.245  INFO 67202 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
-2016-11-11 13:06:51.248  INFO 67202 --- [           main] io.pivotal.demo.SpringPersonApplication  : Started SpringPersonApplication in 3.371 seconds (JVM running for 3.848)
-```
-
-Now let's validate that there is data in the Redis data store. Open a terminal session and type the following command:
-
-```bash
-$ redis-cli hgetall persons
-1) "bobevans@someplace.com"
-2) "{\"firstName\":\"Bob\",\"lastName\":\"Evans\",\"emailAddress\":\"bobevans@someplace.com\"}"
-3) "johndoe@nowhere.com"
-4) "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"emailAddress\":\"johndoe@nowhere.com\"}"
-5) "jane@somewhere.com"
-6) "{\"firstName\":\"Jane\",\"lastName\":\"Smith\",\"emailAddress\":\"jane@somewhere.com\"}"
-```
-Notice that Redis returns the data that is found in persons.json, so if you added or changed some of the data, it would be reflected here.
-
-== Creating REST Endpoints
+=== Creating REST Endpoints
 
 Now that we have a domain object, and some sample data, the next step is to add REST endpoints that provide an API for manipulating the data.
 
@@ -591,12 +609,8 @@ public class PersonController {
 ```
 +
 . Save the File
-. Run the application
-. Open a browser and navigate to the following URL: http://localhost:8080/persons
 
-image::rest-returning-data.png[]
-
-What does this class do? First, it defines a @RestController located at the /persons URI. When running locally, this means the URL would be http://localhost:8080/persons. 
+What does this class do? First, it defines a @RestController located at the /persons URI. When running, this means the URL would be http://spring-persons-xxx.my-cf-domain.com/persons. 
 
 Inside of this class, the constructor is annotated with the @Autowired attribute which let's Spring know it will be constructing this class on our behalf. That way, we can determine later what CrudRepository we want to use. In our case, we only have one implementation, but you could add a MySQL or HSQL or another implmentation at a later date if you wanted to. 
 
@@ -606,73 +620,17 @@ Another interesting thing to note here is that there are annotations that map a 
 
 Validate that the other endpoints work by using a REST tool like curl or a browser plugin to add, retrieve, update, and delete a person from your repository. 
 
-==== Adding a New Record
+=== Part 6: Running on Pivotal Cloud Foundry
 
-```
-$ curl -H "Content-Type: application/json" -X PUT  -d '{"firstName":"My","lastName":"Name","emailAddress":"myname@example.com"}' http://localhost:8080/persons
-$ redis-cli hgetall persons  
-```
+Now that the application has all the necessary features completed, it is time to push to Pivotal Cloud Foundry and bind to Redis as a backing store. 
 
-==== Retrieving a Record
+==== Pushing to Pivotal Cloud Foundry
 
-```
-$ curl -H "Content-Type: application/json" -X GET http://localhost:8080/persons/myname%40example.com
-$ redis-cli hgetall persons  
-```
-
-==== Updating a Record
-
-```
-$ curl -H "Content-Type: application/json" -X POST  -d '{"firstName":"My","lastName":"RealName","emailAddress":"myname@example.com"}' http://localhost:8080/persons
-$ redis-cli hgetall persons 
-```
-==== Deleting a Record
-
-```
-$ curl -H "Content-Type: application/json" -X DELETE http://localhost:8080/persons/myname%40example.com
-$ redis-cli hgetall persons 
-```
-
-== Adding Cloud Configuration
-
-Now that we have debugged our application and are satisfied with how it is working, it's time to look at what it will take to deploy it to Pivotal Cloud Foundry. Remember when we created the _RedisLocalConfig_ class? We need to add a configuration profile for a cloud deployment. Let's do that now:
-
-. Create a new Java Class called *RedisCloudConfig* in the *io.pivotal.demo.config* package
-. Edit the contents of this file to contain the following:
-+
-```
-import org.springframework.cloud.config.java.AbstractCloudConfig;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-
-@Configuration
-@Profile("cloud")
-public class RedisCloudConfig extends AbstractCloudConfig {
-
-	@Bean
-	public RedisConnectionFactory redisConnection()
-	{
-		return connectionFactory().redisConnectionFactory();
-	}
-}
-```
-+
-What does this class do? It uses a Spring @Profile attribute to indicate that this class should only be instanciated when "cloud" is defined. When you run an application in Pivotal Cloud Foundry, this profile is automatically enabled. You can also specify which profile you want to run by setting the spring.profiles.active environment variable if you want to use something other than cloud.
-+
-. Run the application locally 
-. Open a browser and hit the following URL: http://localhost:8080/persons
-+ 
-Notice that the application is still working locally. 
-
-== Pushing to Pivotal Cloud Foundry
-
-Now we have all the pieces to run this in Pivotal Cloud Foundry. 
+Before we deploy to cloud foundry there are a few things that need to occur. 
 
 . If you haven't already, download the latest release of the Cloud Foundry CLI from link:https://github.com/cloudfoundry/cli/releases[CF CLI] for your operating system and install it.
 
-. Set the API target for the CLI: (set appropriate end point for your environment)
+. Set the API target for the CLI: (this information will be provided to you in the workshop)
 +
 ----
 $ cf api https://api.sys.cloud.rick-ross.com --skip-ssl-validation
@@ -684,32 +642,34 @@ $ cf api https://api.sys.cloud.rick-ross.com --skip-ssl-validation
 $ cf login
 ----
 +
-. Follow the prompts
+. Follow the prompts, using the username & password provided to you during the workshop.
 . Build the application jar file
 +
 ```
 $ cd <location of your project>
-$ mvn clean package
+$ ./mvnw clean package -DskipTests
 ```
 +
-This creates a self-contained Jar file for the application in the _target_ folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the _target_ folder
+This creates a self-contained Jar file for the application in the _target_ folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the _target_ folder. 
++
+Notice the *-DskipTest* argument which tells Maven that it should not run the unit tests. The reason we are using specifying this is because running the tests locally will fail because it will not be able to locate a local Redis repository.
 +
 . Push the application using the following command line
 +
 ```
 $ cf push spring-person --no-start --random-route -p target/Spring-Person-0.0.1-SNAPSHOT.jar
-Creating app spring-person in org Pivotal / space Development as rross@pivotal.io...
+Creating app spring-person in org pivotal / space development as rross@pivotal.io...
 OK
 
-Creating route spring-person-jazzy-necessitousness.app.cloud.rick-ross.com...
+Creating route spring-person-commemoratory-isogeny.app.cloud.rick-ross.com...
 OK
 
-Binding spring-person-jazzy-necessitousness.app.cloud.rick-ross.com to spring-person...
+Binding spring-person-commemoratory-isogeny.app.cloud.rick-ross.com to spring-person...
 OK
 
 Uploading spring-person...
-Uploading app files from: /var/folders/mw/n4bhxvfn7wb4dw9rz8kznwcw0000gp/T/unzipped-app438824037
-Uploading 1.2M, 133 files
+Uploading app files from: /var/folders/mw/n4bhxvfn7wb4dw9rz8kznwcw0000gp/T/unzipped-app029402170
+Uploading 24.4M, 187 files
 Done uploading
 OK
 ```
@@ -719,16 +679,16 @@ This command uploads the application to Pivotal Cloud Foundry, and does not star
 +
 ```
 $ cf marketplace
-Getting services from marketplace in org Pivotal / space Development as rross@pivotal.io...
+Getting services from marketplace in org pivotal / space development as rross@pivotal.io...
 OK
 
 service                       plans                     description
-app-autoscaler                bronze, gold              Scales bound applications in response to load (beta)
+app-autoscaler                standard                  Scales bound applications in response to load (beta)
 p-circuit-breaker-dashboard   standard                  Circuit Breaker Dashboard for Spring Cloud Applications
 p-config-server               standard                  Config Server for Spring Cloud Applications
-p-mysql                       100mb-dev                 MySQL service for application development and testing
+p-mysql                       100mb                     MySQL databases on demand
 p-rabbitmq                    standard                  RabbitMQ is a robust and scalable high-performance multi-protocol messaging broker.
-p-redis                       dedicated-vm, shared-vm   Redis service to provide a key-value store
+p-redis                       shared-vm, dedicated-vm   Redis service to provide a key-value store
 p-service-registry            standard                  Service Registry for Spring Cloud Applications
 
 TIP:  Use 'cf marketplace -s SERVICE' to view descriptions of individual plans of a given service.
@@ -754,36 +714,59 @@ TIP: Use 'cf restage spring-person' to ensure your env variable changes take eff
 . Start the application
 +
 ```
-$ cf start spring-person
-Starting app spring-person in org Pivotal / space Development as rross@pivotal.io...
-Downloading dotnetcore...
-Downloading nodejs_buildpack...
-Downloading staticfile_buildpack...
-Downloading java_buildpack_offline...
-Downloading go_buildpack...
-Downloaded nodejs_buildpack
-Downloading python_buildpack...
-Downloaded staticfile_buildpack
-Downloading php_buildpack...
-Downloaded dotnetcore
+$ cf push spring-person --no-start --random-route -p target/Spring-Person-0.0.1-SNAPSHOT.jar
+Creating app spring-person in org pivotal / space development as rross@pivotal.io...
+OK
+
+Creating route spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com...
+OK
+
+Binding spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com to spring-person...
+OK
+
+Uploading spring-person...
+Uploading app files from: /var/folders/mw/n4bhxvfn7wb4dw9rz8kznwcw0000gp/T/unzipped-app670043780
+Uploading 844K, 131 files
+Done uploading
+OK
+
+Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf create-service p-redis shared-vm SpringPersonRedis
+Creating service instance SpringPersonRedis in org pivotal / space development as rross@pivotal.io...
+OK
+Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf bind-service spring-person SpringPersonRedis
+Binding service SpringPersonRedis to app spring-person in org pivotal / space development as rross@pivotal.io...
+OK
+TIP: Use 'cf restage spring-person' to ensure your env variable changes take effect
+Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf start spring-person
+Starting app spring-person in org pivotal / space development as rross@pivotal.io...
 Downloading binary_buildpack...
-Downloaded go_buildpack
 Downloading ruby_buildpack...
-Downloaded java_buildpack_offline
-Downloaded php_buildpack
-Downloaded binary_buildpack
+Downloading python_buildpack...
+Downloading nodejs_buildpack...
+Downloading go_buildpack...
 Downloaded ruby_buildpack
+Downloading staticfile_buildpack...
+Downloaded binary_buildpack
+Downloading java_buildpack_offline...
+Downloaded nodejs_buildpack
+Downloaded go_buildpack
+Downloading php_buildpack...
 Downloaded python_buildpack
+Downloading dotnet_core_buildpack...
+Downloaded staticfile_buildpack
+Downloaded dotnet_core_buildpack
+Downloaded php_buildpack
+Downloaded java_buildpack_offline
 Creating container
 Successfully created container
 Downloading app package...
-Downloaded app package (33.8M)
+Downloaded app package (37.3M)
 Staging...
------> Java Buildpack Version: v3.8.1 (offline) | https://github.com/cloudfoundry/java-buildpack.git#29c79f2
------> Downloading Open Jdk JRE 1.8.0_91-unlimited-crypto from https://java-buildpack.cloudfoundry.org/openjdk/trusty/x86_64/openjdk-1.8.0_91-unlimited-crypto.tar.gz (found in cache)
-       Expanding Open Jdk JRE to .java-buildpack/open_jdk_jre (1.0s)
+-----> Java Buildpack Version: v3.10 (offline) | https://github.com/cloudfoundry/java-buildpack.git#193d6b7
+-----> Downloading Open Jdk JRE 1.8.0_111 from https://java-buildpack.cloudfoundry.org/openjdk/trusty/x86_64/openjdk-1.8.0_111.tar.gz (found in cache)
+       Expanding Open Jdk JRE to .java-buildpack/open_jdk_jre (1.1s)
 -----> Downloading Open JDK Like Memory Calculator 2.0.2_RELEASE from https://java-buildpack.cloudfoundry.org/memory-calculator/trusty/x86_64/memory-calculator-2.0.2_RELEASE.tar.gz (found in cache)
-       Memory Settings: -Xss349K -Xmx681574K -XX:MaxMetaspaceSize=104857K -Xms681574K -XX:MetaspaceSize=104857K
+       Memory Settings: -XX:MetaspaceSize=104857K -XX:MaxMetaspaceSize=104857K -Xss349K -Xmx681574K -Xms681574K
 -----> Downloading Spring Auto Reconfiguration 1.10.0_RELEASE from https://java-buildpack.cloudfoundry.org/auto-reconfiguration/auto-reconfiguration-1.10.0_RELEASE.jar (found in cache)
 Exit status 0
 Staging complete
@@ -791,11 +774,13 @@ Uploading droplet, build artifacts cache...
 Uploading build artifacts cache...
 Uploading droplet...
 Uploaded build artifacts cache (109B)
-Uploaded droplet (79.4M)
+Uploaded droplet (82.4M)
 Uploading complete
 Destroying container
 Successfully destroyed container
 
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
 0 of 1 instances running, 1 starting
 1 of 1 instances running
 
@@ -806,29 +791,29 @@ OK
 
 App spring-person was started using this command `CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_jre/bin/java-buildpack-memory-calculator-2.0.2_RELEASE -memorySizes=metaspace:64m..,stack:228k.. -memoryWeights=heap:65,metaspace:10,native:15,stack:10 -memoryInitials=heap:100%,metaspace:100% -stackThreads=300 -totMemory=$MEMORY_LIMIT) && JAVA_OPTS="-Djava.io.tmpdir=$TMPDIR -XX:OnOutOfMemoryError=$PWD/.java-buildpack/open_jdk_jre/bin/killjava.sh $CALCULATED_MEMORY" && SERVER_PORT=$PORT eval exec $PWD/.java-buildpack/open_jdk_jre/bin/java $JAVA_OPTS -cp $PWD/. org.springframework.boot.loader.JarLauncher`
 
-Showing health and status for app spring-person in org Pivotal / space Development as rross@pivotal.io...
+Showing health and status for app spring-person in org pivotal / space development as rross@pivotal.io...
 OK
 
 requested state: started
 instances: 1/1
 usage: 1G x 1 instances
-urls: spring-person-jazzy-necessitousness.app.cloud.rick-ross.com
-last uploaded: Tue Nov 8 22:15:54 UTC 2016
+urls: spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com
+last uploaded: Mon Feb 13 21:41:03 UTC 2017
 stack: cflinuxfs2
-buildpack: java-buildpack=v3.8.1-offline-https://github.com/cloudfoundry/java-buildpack.git#29c79f2 java-main open-jdk-like-jre=1.8.0_91-unlimited-crypto open-jdk-like-memory-calculator=2.0.2_RELEASE spring-auto-reconfiguration=1.10.0_RELEASE
+buildpack: java-buildpack=v3.10-offline-https://github.com/cloudfoundry/java-buildpack.git#193d6b7 java-main open-jdk-like-jre=1.8.0_111 open-jdk-like-memory-calculator=2.0.2_RELEASE spring-auto-reconfiguration=1.10.0_RELEASE
 
-     state     since                    cpu    memory         disk           details
-#0   running   2016-11-08 05:25:55 PM   0.0%   407.5M of 1G   161.7M of 1G
+     state     since                    cpu    memory       disk         details
+#0   running   2017-02-13 04:42:12 PM   0.0%   287M of 1G   165M of 1G
 ```
 +
-. Open a browser and go to the URL indicated in the urls: line above, with "/persons" appended to the end of it. In this case the url is https://spring-person-jazzy-necessitousness.app.cloud.rick-ross.com/persons
+. Open a browser and go to the URL indicated in the urls: line above, with "/persons" appended to the end of it. In this case the url is https://spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com/persons
 +
 
 image::running-on-pcf.png[]
 
 Now we have an application that runs locally as well as on Pivotal Cloud Foundry. 
 
-== Creating a Manifest
+=== Creating a Manifest
 
 To make it easier to push updates to Pivotal Cloud Foundry, let's create a manifest file. 
 
@@ -846,6 +831,8 @@ applications:
    - SpringPersonRedis
 ```
 +
+Note that the Name of the Service needs to match the service you created previously. In this case it is __SpringPersonRedis__.
++
 . Save the file
 . Push the application again this time with no arguments
 +
@@ -854,4 +841,31 @@ $ cf push
 ```
 +
 . Open a browser and navigate to the /persons URL to verify the applicaiton is working
+
+=== Part 7: Testing the other REST endpoints (Optional)
+
+If you have curl installed, you can add, retrieve, update and delete records using the REST API that we created. The sections below walk you through the process of using those APIs. Note that the URLs in this seciton are using HTTP and not HTTPS.
+
+==== Adding a New Record
+
+```
+$ curl -H "Content-Type: application/json" -X PUT  -d '{"firstName":"My","lastName":"Name","emailAddress":"myname@example.com"}' http://<your application URL goes here>/persons
+```
+
+==== Retrieving a Record
+
+```
+$ curl -H "Content-Type: application/json" -X GET http://<your application URL goes here>/persons/myname%40example.com
+```
+
+==== Updating a Record
+
+```
+$ curl -H "Content-Type: application/json" -X POST  -d '{"firstName":"My","lastName":"RealName","emailAddress":"myname@example.com"}' http://<your application URL goes here>/persons
+```
+==== Deleting a Record
+
+```
+$ curl -H "Content-Type: application/json" -X DELETE http://<your application URL goes here>/persons/myname%40example.com
+```
 
