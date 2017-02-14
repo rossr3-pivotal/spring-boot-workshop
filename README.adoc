@@ -10,6 +10,7 @@ In this workshop, we will build a new Java REST application that is backed by Re
 *** link:https://spring.io/tools[Spring Tool Suite] or link:https://www.jetbrains.com/idea/[IntelliJ] or link:https://eclipse.org/downloads/[Eclipse] 
 *** link:https://github.com/cloudfoundry/cli/releases[CF CLI]
 *** link:http://curl.haxx.se/[Curl] (Optional)
+*** Git CLI for link:https://github.com/git-for-windows/git/releases/download/v2.9.0.windows.1/Git-2.9.0-64-bit.exe[Windows] or Git from link:https://desktop.github.com/[github.com] (Optional)
 
 == Part 1: Spring Boot
 link::https://projects.spring.io/spring-boot/[Spring Boot] takes an opinionated view of building production-ready Spring applications. Favoring convention over configuration, it is designed to get you up and running as quickly as possible. 
@@ -870,7 +871,7 @@ $ curl -H "Content-Type: application/json" -X DELETE http://<your application UR
 ```
 === Part 8: Actuator
 
-Remember earlier, when we selected dependencies for this project? We chose the Actuator and Actuator Docs dependencies. In this section, we'll explore what Actuators are and how to use and extend them.
+Remember earlier, when we selected dependencies for this project? We chose the Actuator and Actuator Docs dependencies. In this section, we'll explore what Actuators are and how to use them.
 
 One thing that all applicaitons have in common is the need to monitor and manage them. 
 
@@ -942,6 +943,43 @@ image:app-manager.png[]
 +
 image:spring-person-settings.png[]
 
+===== Adding Git Information (Optional)
+
+This step requires that you have installed git on your computer. You will need to be able to create a local repository in order for this step to work. 
+
+. Edit the pom.xml file. It is located in the root folder of the project.
+. Navigate down to the plugin section. Add the following snippet below the existing spring-boot-maven-plugin
++
+----
+	        <plugin>
+	            <groupId>pl.project13.maven</groupId>
+	            <artifactId>git-commit-id-plugin</artifactId>
+	        </plugin>	
+----
++
+. Save the file
+. Edit the application.properties file. It is located in the src/main/resources folder.
+. Add the following line to the end of the file
++
+----
+management.info.git.mode=full
+----
+
+These changes that we added to the project adds Git information to the /info endpoint. For additional details visit this link:http://docs.pivotal.io/pivotalcf/1-9/console/spring-boot-actuators.html#git-info[link]
+
+By adding these configuration changes (specifically the git commit plugin XML) you are indicating that your application has a git repository. Since we have started from scratch, let's create a git repository. 
+
+Note: Failure to create a git repository will result in a build error. 
+
+. Open up a Command prompt or terminal window
+. Change directories to the location of your application
+. Run the following Git commands to initialize, add files and commit to the local repository
++
+```
+$ git init
+$ git add .gitignore manifest.yml mvnw mvnw.cmd pom.xml src/
+$ git commit -m 'Initial commit'
+```
 
 ===== Adding Additional Information into Apps Manager
 
@@ -960,7 +998,7 @@ Let's make a few minor changes to our application to expose additional details.
                 </executions>
 ----
 +
-The full section should look like this:
+The full section should look like this without the git entry.
 +
 ----
 	<build>
@@ -976,6 +1014,30 @@ The full section should look like this:
                     </execution>
                 </executions>
 			</plugin>		
+		</plugins>
+	</build>
+----
++
+With the *optional* __Git Information__, this section looks like this
++
+----
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+			</plugin>	
+	        <plugin>
+	            <groupId>pl.project13.maven</groupId>
+	            <artifactId>git-commit-id-plugin</artifactId>
+	        </plugin>			
 		</plugins>
 	</build>
 ----
@@ -1013,7 +1075,21 @@ $ cf push
 . Accept the SSL Security Warnings
 . Go back to Apps Manager and reload the page
 +
-image:app-manager-spring.png[]
+image:app-manager-spring-with-git.png[]
 +
 Notice the Spring Logo to the left of the application name. This indicates that Apps Manager has recognized this as a Spring Boot application. 
++
+If you followed the optional Git Information steps above, you'll see at the top right, a Git Commit ID
++
+Expanding the arrow next to the left of each application instance reveals the health check details, showing you details like the Redis health along with other basic metrics. 
++
+. Navigate to the Settings tab
++
+image:app-manager-settings-spring.png[]
++
+Notice the additional entries for Git and Spring Boot information where you can view the JSON
++
+Note that currently some information is only shown if the Git information has been included. 
+
+
 
