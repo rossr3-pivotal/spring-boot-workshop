@@ -868,4 +868,152 @@ $ curl -H "Content-Type: application/json" -X POST  -d '{"firstName":"My","lastN
 ```
 $ curl -H "Content-Type: application/json" -X DELETE http://<your application URL goes here>/persons/myname%40example.com
 ```
+=== Part 8: Actuator
+
+Remember earlier, when we selected dependencies for this project? We chose the Actuator and Actuator Docs dependencies. In this section, we'll explore what Actuators are and how to use and extend them.
+
+One thing that all applicaitons have in common is the need to monitor and manage them. 
+
+==== Actuator Endpoints
+
+Spring Boot includes a number of built-in actuator endpoints that enable you to montior and interact with your application. Most endpoints are exposed via HTTP although other methods are available.
+
+The most common endpoints are shown below:
+
+* health - Lists application health information
+* beans - Displays a list of all Spring Beans
+* info - Displays arbitrary application information
+
+It's important to note that not all endpoints are always on due to potential security concerns. Later on, we'll change the behavior and enable endpoints. 
+
+For a list of all of the available endpoints see this link:http://docs.spring.io/spring-boot/docs/1.5.1.RELEASE/reference/htmlsingle/#production-ready-endpoints[link]
+
+. What happens when you go to your application's /health endpoint in a browser? (e.g. http://<your application URL goes here>/health)
+. What happens when you go to your applicaiton's /docs endpoint? 
+. What happens when you go to your application's /info endpoint? 
+. What happens when you go to your application's /autoconfig endpoint?
+. What happens when you go to your application's /beans endpoint?
+
+===== Unlocking Protected Endpoints
+
+In Spring Boot 1.5 and above, all actuator endpoints, with the exception of /health and /info are secured by default. Let's make a change to our application to make the other endpoints visible.
+
+. Edit the application.properties file. It is located in the src/main/resources folder.
+. Add the following line to the file
++
+----
+endpoints.sensitive=false
+----
++
+. Save the file
+. Build the application jar file
++
+```
+$ cd <location of your project>
+$ ./mvnw clean package -DskipTests
+```
++
+. Push the application to Pivotal Cloud Foundry
++
+```
+$ cf push
+```
+
+Let's hit a few of the endpoints that gave errors before. 
+
+. What happens when you visit the /beans endpoint? 
+. What happens when you visit the /autoconfig endpoint?
+
+Try a few more of the endpoints and become familiar with the type of information they provide. Note that the output is in JSON format so using a JSON pretty printer like link:http://jsonprettyprint.com[this] one is very helpful to make the output more readible. 
+
+==== Actuator Integration with Pivotal Cloud Foundry
+
+Starting in Pivotal Cloud Foundry 1.9 and above, the Pivotal Apps Manager provides additional functionality for Spring Boot applications 1.5 and higher. In order to take advantage of these capabilities, let's take a look at the application details in Apps Manager before we explore the additional capabilities. 
+
+. Open the Apps Manager in a browser
+. Navigate to the Org and Space you are deploying the application to
+. Click on spring-person application and the following screen appears:
++
+image:app-manager.png[]
++
+. Navigate into the Settings tab and notice the entries that are listed
+* App Name
+* Info
++
+image:spring-person-settings.png[]
+
+
+===== Adding Additional Information into Apps Manager
+
+Let's make a few minor changes to our application to expose additional details. 
+
+. Edit the pom.xml file. It is located in the root folder of the project
+. Navigate down to the plugin section. Add the following snippet below the artifactId for spring-boot-maven-plugin
++
+----
+				<executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+----
++
+The full section should look like this:
++
+----
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+			</plugin>		
+		</plugins>
+	</build>
+----
++
+. Save the file
+. Edit the application.properties file. It is located in the src/main/resources folder.
+. Add the following line to the end of the file
++
+----
+management.cloudfoundry.skip-ssl-validation=true
+info.app.version.java=@java.version@
+info.app.version.spring=@spring.version@
+----
++
+The first line is only necessary if your Pivotal Cloud Foundry instance is using a self-signed certificate. 
++
+You can also include information from Git which we won't do in this workshop. For additional details see this link:http://docs.pivotal.io/pivotalcf/1-9/console/spring-boot-actuators.html#git-info[link]
++
+. Save the file
+. Build the application jar file
++
+```
+$ cd <location of your project>
+$ ./mvnw clean package -DskipTests
+```
++
+. Push the application to Pivotal Cloud Foundry
++
+```
+$ cf push
+```
++
+. Go back to the Apps Manager, navigate to the Space and click on spring-person. 
+. Click the View App link 
+. Accept the SSL Security Warnings
+. Go back to Apps Manager and reload the page
++
+image:app-manager-spring.png[]
++
+Notice the Spring Logo to the left of the application name. This indicates that Apps Manager has recognized this as a Spring Boot application. 
 
