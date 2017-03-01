@@ -299,7 +299,6 @@ In order to test our services, it would be helpful to have some data pre-populat
 We have created a repository and some data, but we need to tell Spring how to actually populate the repository with the file.  
 . Create a new Java Class called *RepoConfig* in the *io.pivotal.demo.config* package
 . Edit the contents of this file to contain the following:
-+
 
 ```
 package io.pivotal.demo.config;
@@ -326,8 +325,7 @@ public class RepoConfig {
 	  }
 }
 ```
-+
-. Save the file
+Save the file
 
 This RepoConfig class is used to create a new repository populator object based on Jackson - a library that can be used to parse JSON into Java objects.  This populator will read the persons.json file created previously, parse it into Person objects, and store them in Redis.
 
