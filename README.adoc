@@ -189,15 +189,16 @@ The first step of enhancing our application is by adding a domain object. This o
 . This class will have 3 properties: firstName, lastName, and emailAddress. Use the following code snippet for the class:
 +
 ```
+@RedisHash("persons")
 public class Person {
-	
+
 	private String firstName;
 	private String lastName;
-	private String emailAddress;
-	
-	public Person() {		
+	private @Id String emailAddress;
+
+	public Person() {
 	}
-	
+
 	public Person(String firstName, String lastName, String emailAddress) {
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -241,204 +242,29 @@ public class Person {
 
 === Creating a Repostiory
 
-Next let's create a repository to store the Person information from the Person class we created above. We'll use Redis for this example. Take notice that the constructor of this class requires a RedisTemplate which will be created later on.
+Next let's create a repository to store the Person information from the Person class we created above.
 
-. Create a new Java Class called *PersonRepository* in the *io.pivotal.demo.repository* package. This class will implement the CrudRepository interface.
+. Create a new Java Class called *PersonRepository* in the *io.pivotal.demo.repository* package. This class will extend the CrudRepository interface and Spring with provide an implementation with all of the necessary methods at runtime.  Additional methods not provided by CrudRepository could be declared here as well, but that is not necessary for this example.
+
 . Use the snippet below to create the contents of this class:
 +
 ```
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+package io.pivotal.demo.repository;
+
+import org.springframework.data.repository.CrudRepository;
 
 import io.pivotal.demo.domain.Person;
 
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.repository.CrudRepository;
+public interface PersonRepository extends CrudRepository<Person, String> {
 
-public class PersonRepository implements CrudRepository<Person, String> {
-
-	public static final String PERSONS_KEY = "persons";
-	
-	private final HashOperations<String, String, Person> hashOps;
-	
-	public PersonRepository(RedisTemplate<String, Person> redisTemplate) {
-		this.hashOps = redisTemplate.opsForHash();
-	}
-
-	@Override
-	public long count() {
-		return hashOps.keys(PERSONS_KEY).size();
-	}
-
-	@Override
-	public void delete(String emailAddress) {
-		hashOps.delete(PERSONS_KEY, emailAddress);
-	}
-
-	@Override
-	public void delete(Person person) {
-		hashOps.delete(PERSONS_KEY,  person.getEmailAddress());
-	}
-
-	@Override
-	public void delete(Iterable<? extends Person> persons) {
-		for (Person p : persons) {
-			delete(p);
-		}		
-	}
-
-	@Override
-	public void deleteAll() {
-		Set<String> emails = hashOps.keys(PERSONS_KEY);
-		for (String email : emails) {
-			delete(email);
-		}
-		
-	}
-
-	@Override
-	public boolean exists(String emailAddress) {
-		return hashOps.hasKey(PERSONS_KEY,  emailAddress);
-	}
-
-	@Override
-	public Iterable<Person> findAll() {
-		return hashOps.values(PERSONS_KEY);
-	}
-
-	@Override
-	public Iterable<Person> findAll(Iterable<String> emailAddresses) {
-		return hashOps.multiGet(PERSONS_KEY, convertIterableToList(emailAddresses));
-	}
-
-	@Override
-	public Person findOne(String emailAddress) {
-		return hashOps.get(PERSONS_KEY, emailAddress);
-	}
-
-	@Override
-	public <S extends Person> S save(S person) {
-		hashOps.put(PERSONS_KEY, person.getEmailAddress(), person);
-		
-		return person;
-	}
-
-	@Override
-	public <S extends Person> Iterable<S> save(Iterable<S> persons) {
-		List<S> result = new ArrayList();
-		
-		for(S entity : persons) {
-			save(entity);
-			result.add(entity);
-		}
-
-		return result;
-	}
-	
-	private <T> List<T> convertIterableToList(Iterable<T> iterable) {
-        List<T> list = new ArrayList<>();
-        for (T object : iterable) {
-            list.add(object);
-        }
-        return list;
-    }
 }
-```
-+
-. Save the file
-
-=== Creating a Repository Populator
-
-Let's create a class that will load data into the repository. This class will hook into the application listener to determine if it should add data to the repository or not. It is meant to boostrap our application with some pre-defined data if necessary.
-
-. Create a new Java Class called *PersonRepositoryPopulator* in the *io.pivotal.demo.repository* package
-. Use the snippet below to create the contents of this class:
-+
-```
-import io.pivotal.demo.domain.Person;
-
-import java.util.Collection;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.init.Jackson2ResourceReader;
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-@Component
-public class PersonRepositoryPopulator implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
-	
-    private final Jackson2ResourceReader resourceReader;
-    private final Resource sourceData;
-    private ApplicationContext applicationContext;
-    
-    public PersonRepositoryPopulator()
-    {
-    	ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        resourceReader = new Jackson2ResourceReader(mapper);
-        sourceData = new ClassPathResource("persons.json");
-    }
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		 this.applicationContext = applicationContext;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		 if (event.getApplicationContext().equals(applicationContext)) {
-	            CrudRepository personRepository =
-	                    BeanFactoryUtils.beanOfTypeIncludingAncestors(applicationContext, CrudRepository.class);
-	            if (personRepository != null && personRepository.count() == 0) {
-	                populate(personRepository);
-	            }
-	        }
-	}
-	
-    @SuppressWarnings("unchecked")
-    public void populate(CrudRepository repository) {
-        Object entity = getEntityFromResource(sourceData);
-
-        if (entity instanceof Collection) {
-            for (Person person : (Collection<Person>) entity) {
-                if (person != null) {
-                    repository.save(person);
-                }
-            }
-        } else {
-            repository.save(entity);
-        }
-    }
-
-    private Object getEntityFromResource(Resource resource) {
-        try {
-            return resourceReader.readFrom(resource, this.getClass().getClassLoader());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }	
-}
-
 ```
 +
 . Save the file
 
 === Sample Data
 
-Let's create some sample data to load into the repository.
+In order to test our services, it would be helpful to have some data pre-populated at startup.  Let's create some sample data to load into the repository.
 
 . Create a new file called *persons.json* in the *src/main/resources* folder
 . Edit the contents of this file to contain the following. Feel free to add additional entries if you would like. 
@@ -468,86 +294,44 @@ Let's create some sample data to load into the repository.
 +
 . Save the file
 
-The PersonRepositoryPopulator class reads the persons.json, attempts to parse it and if it finds a person array or object, populates the repository with the data, but only if there aren't records already in it.  
+=== Creating a Repository Configuration
 
-=== Creating a Redis Configuration
-
-Let's create a Redis Configuration that will be used to create Redis specific entites such as a RedisTemplate which is used to let Redis know how to serialize objects being stored in it.
-
-. Create a new Java Class called *RedisConfig* in the *io.pivotal.demo.config* package
+We have created a repository and some data, but we need to tell Spring how to actually populate the repository with the file.  
+. Create a new Java Class called *RepoConfig* in the *io.pivotal.demo.config* package
 . Edit the contents of this file to contain the following:
 +
 
 ```
-import io.pivotal.demo.domain.Person;
-import io.pivotal.demo.repository.PersonRepository;
+package io.pivotal.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.repository.init.Jackson2RepositoryPopulatorFactoryBean;
 
 @Configuration
-public class RedisConfig {
+@EnableRedisRepositories
+public class RepoConfig {
+	  @Bean
+	  public Jackson2RepositoryPopulatorFactoryBean repositoryPopulator() {
 
-	@Bean
-	public PersonRepository repository(RedisTemplate<String, Person> redisTemplate) {
-		return new PersonRepository(redisTemplate);
-	}
-	
-	@Bean
-	public RedisTemplate<String, Person> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, Person> template = new RedisTemplate();
-		
-		template.setConnectionFactory(redisConnectionFactory);
-		
-		RedisSerializer<String> stringSerializer = new StringRedisSerializer();
-		RedisSerializer<Person> personSerializer = new Jackson2JsonRedisSerializer<>(Person.class);
-		
-		template.setKeySerializer(stringSerializer);
-		template.setValueSerializer(personSerializer);
-		template.setHashKeySerializer(stringSerializer);
-		template.setHashValueSerializer(personSerializer);
-		
-		return template;
-	}
+	    Resource sourceData = new ClassPathResource("persons.json");
+
+	    Jackson2RepositoryPopulatorFactoryBean factory = new Jackson2RepositoryPopulatorFactoryBean();
+	    // Set a custom ObjectMapper if Jackson customization is needed
+	    factory.setResources(new Resource[] { sourceData });
+	    return factory;
+	  }
 }
 ```
 +
 . Save the file
 
-This RedisConfig class is used to create a new Person Repository and to define the RedisTemplate for the Person class. One key thing to note is that it uses the @Bean annotation to declare a Spring Bean. A Spring Bean is an object that is instantiated, assembled and managed by Spring's Inversion of Control (IoC) container, allowing for Dependency Injection (DI). Note too that this class needs a _RedisConnectionFactory_ which we have not yet defined. 
+This RepoConfig class is used to create a new repository populator object based on Jackson - a library that can be used to parse JSON into Java objects.  This populator will read the persons.json file created previously, parse it into Person objects, and store them in Redis.
 
-=== Adding Cloud Configuration
-
-It's time to look at what it will take to deploy it to Pivotal Cloud Foundry. We need to add a configuration profile for a cloud deployment. Let's do that now:
-
-. Create a new Java Class called *RedisCloudConfig* in the *io.pivotal.demo.config* package
-. Edit the contents of this file to contain the following:
-+
-```
-import org.springframework.cloud.config.java.AbstractCloudConfig;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-
-@Configuration
-@Profile("cloud")
-public class RedisCloudConfig extends AbstractCloudConfig {
-
-	@Bean
-	public RedisConnectionFactory redisConnection()
-	{
-		return connectionFactory().redisConnectionFactory();
-	}
-}
-```
-+
-What does this class do? It uses a Spring @Profile attribute to indicate that this class should only be instanciated when "cloud" is defined. When you run an application in Pivotal Cloud Foundry, this profile is automatically enabled. You can also specify which profile you want to run by setting the spring.profiles.active environment variable if you want to use something other than cloud.
+This class also uses an annontation '@EnableRedisRepositories' that tells Spring that the repo uses a Redis datastore, and to look for a connection.
 
 === Creating REST Endpoints
 
