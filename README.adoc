@@ -650,7 +650,7 @@ It's important to note that not all endpoints are always on due to potential sec
 For a list of all of the available endpoints see this link:http://docs.spring.io/spring-boot/docs/1.5.1.RELEASE/reference/htmlsingle/#production-ready-endpoints[link]
 
 . What happens when you go to your application's /health endpoint in a browser? (e.g. http://<your application URL goes here>/health)
-. What happens when you go to your applicaiton's /docs endpoint? 
+. What happens when you go to your application's /docs endpoint? 
 . What happens when you go to your application's /info endpoint? 
 . What happens when you go to your application's /autoconfig endpoint?
 . What happens when you go to your application's /beans endpoint?
@@ -749,7 +749,7 @@ Let's make a few minor changes to our application to expose additional details.
 . Navigate down to the plugin section. Add the following snippet below the artifactId for spring-boot-maven-plugin
 +
 ----
-				<executions>
+		<executions>
                     <execution>
                         <goals>
                             <goal>build-info</goal>
@@ -767,12 +767,12 @@ The full section should look like this without the git entry.
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<executions>
-                    <execution>
-                        <goals>
-                            <goal>build-info</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                    			<execution>
+                        			<goals>
+                            				<goal>build-info</goal>
+                        			</goals>
+                    			</execution>
+                		</executions>
 			</plugin>		
 		</plugins>
 	</build>
@@ -787,12 +787,12 @@ With the *optional* __Git Information__, this section looks like this
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<executions>
-                    <execution>
-                        <goals>
-                            <goal>build-info</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                    			<execution>
+                        			<goals>
+                            				<goal>build-info</goal>
+                        			</goals>
+                    			</execution>
+                		</executions>
 			</plugin>	
 	        <plugin>
 	            <groupId>pl.project13.maven</groupId>
