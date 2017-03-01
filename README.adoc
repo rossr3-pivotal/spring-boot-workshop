@@ -252,8 +252,6 @@ Next let's create a repository to store the Person information from the Person c
 . Use the snippet below to create the contents of this class:
 +
 ```
-package io.pivotal.demo.repository;
-
 import org.springframework.data.repository.CrudRepository;
 
 import io.pivotal.demo.domain.Person;
