@@ -247,7 +247,7 @@ public class Person {
 
 Next let's create a repository to store the Person information from the Person class we created above.
 
-. Create a new Java Class called *PersonRepository* in the *io.pivotal.demo.repository* package. This class will extend the CrudRepository interface and Spring with provide an implementation with all of the necessary methods at runtime.  Additional methods not provided by CrudRepository could be declared here as well, but that is not necessary for this example.
+. Create a new Java Interface called *PersonRepository* in the *io.pivotal.demo.repository* package. This interface will extend the CrudRepository interface and Spring with provide an implementation with all of the necessary methods at runtime.  Additional methods not provided by CrudRepository could be declared here as well, but that is not necessary for this example.
 
 . Use the snippet below to create the contents of this class:
 +
