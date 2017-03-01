@@ -303,8 +303,6 @@ We have created a repository and some data, but we need to tell Spring how to ac
 . Edit the contents of this file to contain the following:
 +
 ```
-package io.pivotal.demo.config;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
