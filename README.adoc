@@ -189,6 +189,9 @@ The first step of enhancing our application is by adding a domain object. This o
 . This class will have 3 properties: firstName, lastName, and emailAddress. Use the following code snippet for the class:
 +
 ```
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+
 @RedisHash("persons")
 public class Person {
 
