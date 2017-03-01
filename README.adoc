@@ -498,30 +498,7 @@ TIP: Use 'cf restage spring-person' to ensure your env variable changes take eff
 . Start the application
 +
 ```
-$ cf push spring-person --no-start --random-route -p target/Spring-Person-0.0.1-SNAPSHOT.jar
-Creating app spring-person in org pivotal / space development as rross@pivotal.io...
-OK
-
-Creating route spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com...
-OK
-
-Binding spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com to spring-person...
-OK
-
-Uploading spring-person...
-Uploading app files from: /var/folders/mw/n4bhxvfn7wb4dw9rz8kznwcw0000gp/T/unzipped-app670043780
-Uploading 844K, 131 files
-Done uploading
-OK
-
-Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf create-service p-redis shared-vm SpringPersonRedis
-Creating service instance SpringPersonRedis in org pivotal / space development as rross@pivotal.io...
-OK
-Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf bind-service spring-person SpringPersonRedis
-Binding service SpringPersonRedis to app spring-person in org pivotal / space development as rross@pivotal.io...
-OK
-TIP: Use 'cf restage spring-person' to ensure your env variable changes take effect
-Rick-Ross-MacBook-Pro-8835:Spring-Person rross$ cf start spring-person
+$ cf start spring-person
 Starting app spring-person in org pivotal / space development as rross@pivotal.io...
 Downloading binary_buildpack...
 Downloading ruby_buildpack...
