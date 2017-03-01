@@ -572,7 +572,7 @@ buildpack: java-buildpack=v3.10-offline-https://github.com/cloudfoundry/java-bui
 
 image::running-on-pcf.png[]
 
-Now we have an application that runs locally as well as on Pivotal Cloud Foundry. 
+Now we have an application that runs on Pivotal Cloud Foundry. 
 
 === Creating a Manifest
 
