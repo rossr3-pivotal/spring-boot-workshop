@@ -28,7 +28,7 @@ Spring Boot features include:
 
 . Go to link:http://projects.spring.io/spring-boot/[Spring Boot] and explore
 +
-image::spring-boot.png[]
+image::images/spring-boot.png[]
 +
 
 . How do you find the documentation for a specific version of Spring Boot?
@@ -39,7 +39,7 @@ The easiest way to create your Spring Boot applications is to use link:http://st
 === Exploring Spring Initializr
 . Go to link:http://start.spring.io[start.spring.io] and explore. 
 +
-image::spring-initalizer-0.png[]
+image::images/spring-initalizer-0.png[]
 +
 Notice the various options that are available. 
 +
@@ -59,7 +59,7 @@ In this seciton we will start the process of creating the application we will us
 .. Under Group, enter: *io.pivotal.demo* or something similar. This will be your Java package name
 .. Under Artitfact enter: *Spring-Person* or something similar. This will be the name of your Java App
 +
-image::spring-initializer-1.png[]
+image::images/spring-initializer-1.png[]
 +
 .. Under the Generate Project button, click the link to switch to the full version. We will now select the dependencies our application will have. 
 .. Under the **Web Section**, select
@@ -84,17 +84,17 @@ image::spring-initializer-1.png[]
 . Now start up your favorite Java IDE. Spring Tool Suite, IntelliJ and Eclipse are common choices.
 . The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Maven project. Navigate to the folder and walk through the prompts. Note that the image below is captured from STS / Eclipse. 
 +
-image::sts-import-project.png[Importing Maven Project using STS / Eclipse]
+image::images/sts-import-project.png[Importing Maven Project using STS / Eclipse]
 +
 You might need to wait for the IDE to import the various dependencies. The image below shows the following progress indicator on the lower right portion of the IDE. Note that this is from STS / Eclipse. 
 +
-image::waiting-for-import.png[]
+image::images/waiting-for-import.png[]
 
 == Part 4:Build and Run your application
 
 . Build and Run your application in your IDE
 +
-image::running-in-sts.png[]
+image::images/running-in-sts.png[]
 +
 . Hmmm. The application didn't start. Taking a look at the logs note the error:
 +
@@ -150,7 +150,7 @@ Using default security password: xxxxxxxx-yyyy-zzzz-aaaa-bbbbbbbbbbbb
 +
 . Use *user* as the user name and the password found in your output logs to log in. You'll see the following error:
 
-image::first-time-running.png[]
+image::images/first-time-running.png[]
 
 So what just happened? We created a spring-initializer project with some dependencies, downloaded the project and then ran it. Under the covers, it is using https://projects.spring.io/spring-boot/[Spring Boot]. Spring Boot takes an opinionated view of building production-ready Spring applications. It favors convention over configuration and is designed to get you up and running very quickly. 
 
@@ -570,7 +570,7 @@ buildpack: java-buildpack=v3.10-offline-https://github.com/cloudfoundry/java-bui
 . Open a browser and go to the URL indicated in the urls: line above, with "/persons" appended to the end of it. In this case the url is https://spring-person-heterochromatic-eelgrass.app.cloud.rick-ross.com/persons
 +
 
-image::running-on-pcf.png[]
+image::images/running-on-pcf.png[]
 
 Now we have an application that runs on Pivotal Cloud Foundry. 
 
@@ -695,13 +695,13 @@ Starting in Pivotal Cloud Foundry 1.9 and above, the Pivotal Apps Manager provid
 . Navigate to the Org and Space you are deploying the application to
 . Click on spring-person application and the following screen appears:
 +
-image:app-manager.png[]
+image::images/app-manager.png[]
 +
 . Navigate into the Settings tab and notice the entries that are listed
 * App Name
 * Info
 +
-image:spring-person-settings.png[]
+image::images/spring-person-settings.png[]
 
 ===== Adding Git Information (Optional)
 
@@ -835,7 +835,7 @@ $ cf push
 . Accept the SSL Security Warnings
 . Go back to Apps Manager and reload the page
 +
-image:app-manager-spring-with-git.png[]
+image::images/app-manager-spring-with-git.png[]
 +
 Notice the Spring Logo to the left of the application name. This indicates that Apps Manager has recognized this as a Spring Boot application. 
 +
@@ -845,7 +845,7 @@ Expanding the arrow next to the left of each application instance reveals the he
 +
 . Navigate to the Settings tab
 +
-image:app-manager-settings-spring.png[]
+image::images/app-manager-settings-spring.png[]
 +
 Notice the additional entries for Git and Spring Boot information where you can view the JSON
 +
