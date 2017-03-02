@@ -356,21 +356,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/persons")
 public class PersonController {
 
-	private CrudRepository<Person, String> repository;
+    private CrudRepository<Person, String> repository;
 	
-	@Autowired
-	public PersonController(CrudRepository<Person, String> repository)
-	{
-		this.repository = repository;
-	}
+    @Autowired
+    public PersonController(CrudRepository<Person, String> repository)
+    {
+        this.repository = repository;
+    }
 	
-	@RequestMapping(method = RequestMethod.GET)
-	public Iterable<Person> persons()
-	{
-		return repository.findAll();
-	}
+    @RequestMapping(method = RequestMethod.GET)
+    public Iterable<Person> persons()
+    {
+        return repository.findAll();
+    }
 	
-	@RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT)
     public Person add(@RequestBody @Valid Person person) {
         return repository.save(person);
     }
