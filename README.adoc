@@ -54,7 +54,7 @@ Notice the various options that are available.
 In this seciton we will start the process of creating the application we will use in this workshop. 
 
 . Go to link:http://start.spring.io[start.spring.io]
-. Generate a *Maven Project* with Spring Boot version *1.5.1*
+. Generate a *Gradle Project* with Spring Boot version *1.5.2*
 . In the Project Metadata section
 .. Under Group, enter: *io.pivotal.demo* or something similar. This will be your Java package name
 .. Under Artitfact enter: *Spring-Person* or something similar. This will be the name of your Java App
@@ -82,7 +82,7 @@ image::images/spring-initializer-1.png[]
 === Importing into your IDE
 . Uncompress the zip file to a location of your choosing. Make sure it keeps the folder structure. Remeber this location as we'll need it shortly.
 . Now start up your favorite Java IDE. Spring Tool Suite, IntelliJ and Eclipse are common choices.
-. The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Maven project. Navigate to the folder and walk through the prompts. Note that the image below is captured from STS / Eclipse. 
+. The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Gradle project. Navigate to the folder and walk through the prompts. **Be sure you click on the Build Model Button**. Note that the image below is captured from STS / Eclipse. 
 +
 image::images/sts-import-project.png[Importing Maven Project using STS / Eclipse]
 +
@@ -92,9 +92,17 @@ image::images/waiting-for-import.png[]
 
 == Part 4:Build and Run your application
 
-. Build and Run your application in your IDE
+. Build and Run your application as a Spring Boot in your IDE
 +
 image::images/running-in-sts.png[]
++
+. If you don't have an option to run as a Spring Boot application, Run as a Java application.
++
+image::images/run-as-java-application.png[]
++
+. When prompted to select the Java Application, type Spring in the search box and highlight SpringPersonApplication and click the OK button.
++
+image::images/select-java-application.png[]
 +
 . Hmmm. The application didn't start. Taking a look at the logs note the error:
 +
@@ -429,19 +437,28 @@ $ cf login
 . Follow the prompts, using the username & password provided to you during the workshop.
 . Build the application jar file
 +
+On a *Mac* use the following commands
++
 ```
 $ cd <location of your project>
-$ ./mvnw clean package -DskipTests
+$ ./gradlew clean build -x test
 ```
 +
-This creates a self-contained Jar file for the application in the _target_ folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the _target_ folder. 
+On *Windows* use the following commands
 +
-Notice the *-DskipTest* argument which tells Maven that it should not run the unit tests. The reason we are using specifying this is because running the tests locally will fail because it will not be able to locate a local Redis repository.
+```
+> cd <location of your project>
+> gradlew.bat clean build -x test
+```
++
+This creates a self-contained Jar file for the application in the _build/libs_ folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the _build/libs_ folder. 
++
+Notice the *-x test* argument which tells Gradle that it should not run the unit tests. The reason we are using specifying this is because running the tests locally will fail because it will not be able to locate a local Redis repository.
 +
 . Push the application using the following command line
 +
 ```
-$ cf push spring-person --no-start --random-route -p target/Spring-Person-0.0.1-SNAPSHOT.jar
+$ cf push spring-person --no-start --random-route -p build/libs/Spring-Person-0.0.1-SNAPSHOT.jar
 Creating app spring-person in org pivotal / space development as rross@pivotal.io...
 OK
 
@@ -587,7 +604,7 @@ applications:
 - name: spring-person
   memory: 1G
   random-route: true
-  path: target/Spring-Person-0.0.1-SNAPSHOT.jar
+  path: build/libs/Spring-Person-0.0.1-SNAPSHOT.jar
   services:
    - SpringPersonRedis
 ```
@@ -669,9 +686,17 @@ endpoints.sensitive=false
 . Save the file
 . Build the application jar file
 +
+On a Mac run the following commands:
++
 ```
 $ cd <location of your project>
-$ ./mvnw clean package -DskipTests
+$ ./gradlew clean build -x test
+```
++
+On Windows run the following commands
+```
+> cd <location of your project>
+> gradlew clean build -x test
 ```
 +
 . Push the application to Pivotal Cloud Foundry
@@ -707,6 +732,8 @@ image::images/spring-person-settings.png[]
 
 This step requires that you have installed git on your computer. You will need to be able to create a local repository in order for this step to work. 
 
+====== For Maven Projects follow these instructions:
+
 . Edit the pom.xml file. It is located in the root folder of the project.
 . Navigate down to the plugin section. Add the following snippet below the existing spring-boot-maven-plugin
 +
@@ -718,6 +745,22 @@ This step requires that you have installed git on your computer. You will need t
 ----
 +
 . Save the file
+
+===== For Gradle Projects follow these instructions:
+
+. Edit the build.gradle file. It is located in the root folder of the project.
+. Navigate down to the plugin section. Add the following snippet before the apply plugin section
++
+----
+plugins {
+	id "com.gorylenko.gradle-git-properties" version "1.4.17"
+}
+----
++
+. Save the file
+
+====== Editing the application.properties File
+
 . Edit the application.properties file. It is located in the src/main/resources folder.
 . Add the following line to the end of the file
 +
@@ -727,7 +770,7 @@ management.info.git.mode=full
 
 These changes that we added to the project adds Git information to the /info endpoint. For additional details visit this link:http://docs.pivotal.io/pivotalcf/1-9/console/spring-boot-actuators.html#git-info[link]
 
-By adding these configuration changes (specifically the git commit plugin XML) you are indicating that your application has a git repository. Since we have started from scratch, let's create a git repository. 
+By adding these configuration changes (specifically the git commit plugin) you are indicating that your application has a git repository. Since we have started from scratch, let's create a git repository. 
 
 Note: Failure to create a git repository will result in a build error. 
 
@@ -737,7 +780,7 @@ Note: Failure to create a git repository will result in a build error.
 +
 ```
 $ git init
-$ git add .gitignore manifest.yml mvnw mvnw.cmd pom.xml src/
+$ git add .gitignore manifest.yml build.gradle gradlew gradlew.bat src/
 $ git commit -m 'Initial commit'
 ```
 
@@ -745,6 +788,7 @@ $ git commit -m 'Initial commit'
 
 Let's make a few minor changes to our application to expose additional details. 
 
+===== For Maven Projects follow these instructions
 . Edit the pom.xml file. It is located in the root folder of the project
 . Navigate down to the plugin section. Add the following snippet below the artifactId for spring-boot-maven-plugin
 +
@@ -803,6 +847,20 @@ With the *optional* __Git Information__, this section looks like this
 ----
 +
 . Save the file
+
+===== For Gradle Projects follow these instructions
+
+. Edit the build.gradle file. It is located in the root folder of the project
+. Add the following snippet before the dependencies section
++
+----
+springBoot  {
+    buildInfo()
+}
+----
+
+===== Editing the application.properties file
+
 . Edit the application.properties file. It is located in the src/main/resources folder.
 . Add the following line to the end of the file
 +
@@ -819,9 +877,18 @@ You can also include information from Git which we won't do in this workshop. Fo
 . Save the file
 . Build the application jar file
 +
+On a *Mac* use the following commands:
++
 ```
 $ cd <location of your project>
-$ ./mvnw clean package -DskipTests
+$ ./gradlew clean build -x test
+```
++
+On *Windows* use the following commands:
++
+```
+> cd <location of your project>
+> gradlew.bat clean build -x test
 ```
 +
 . Push the application to Pivotal Cloud Foundry

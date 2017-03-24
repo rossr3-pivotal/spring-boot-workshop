@@ -565,7 +565,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Go to <a href="http://start.spring.io">start.spring.io</a></p>
 </li>
 <li>
-<p>Generate a <strong>Maven Project</strong> with Spring Boot version <strong>1.5.1</strong></p>
+<p>Generate a <strong>Gradle Project</strong> with Spring Boot version <strong>1.5.2</strong></p>
 </li>
 <li>
 <p>In the Project Metadata section</p>
@@ -670,7 +670,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Now start up your favorite Java IDE. Spring Tool Suite, IntelliJ and Eclipse are common choices.</p>
 </li>
 <li>
-<p>The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Maven project. Navigate to the folder and walk through the prompts. Note that the image below is captured from STS / Eclipse.</p>
+<p>The next step is to import the project you just uncompressed within your Java IDE. Look for an option to import an existing Gradle project. Navigate to the folder and walk through the prompts. <strong>Be sure you click on the Build Model Button</strong>. Note that the image below is captured from STS / Eclipse.</p>
 <div class="imageblock">
 <div class="content">
 <img src="images/sts-import-project.png" alt="Importing Maven Project using STS / Eclipse">
@@ -696,10 +696,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Build and Run your application in your IDE</p>
+<p>Build and Run your application as a Spring Boot in your IDE</p>
 <div class="imageblock">
 <div class="content">
 <img src="images/running-in-sts.png" alt="running in sts.png">
+</div>
+</div>
+</li>
+<li>
+<p>If you don&#8217;t have an option to run as a Spring Boot application, Run as a Java application.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/run-as-java-application.png" alt="run as java application.png">
+</div>
+</div>
+</li>
+<li>
+<p>When prompted to select the Java Application, type Spring in the search box and highlight SpringPersonApplication and click the OK button.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/select-java-application.png" alt="select java application.png">
 </div>
 </div>
 </li>
@@ -1070,21 +1086,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/persons")
 public class PersonController {
 
-	private CrudRepository&lt;Person, String&gt; repository;
+    private CrudRepository&lt;Person, String&gt; repository;
 
-	@Autowired
-	public PersonController(CrudRepository&lt;Person, String&gt; repository)
-	{
-		this.repository = repository;
-	}
+    @Autowired
+    public PersonController(CrudRepository&lt;Person, String&gt; repository)
+    {
+        this.repository = repository;
+    }
 
-	@RequestMapping(method = RequestMethod.GET)
-	public Iterable&lt;Person&gt; persons()
-	{
-		return repository.findAll();
-	}
+    @RequestMapping(method = RequestMethod.GET)
+    public Iterable&lt;Person&gt; persons()
+    {
+        return repository.findAll();
+    }
 
-	@RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT)
     public Person add(@RequestBody @Valid Person person) {
         return repository.save(person);
     }
@@ -1164,24 +1180,36 @@ public class PersonController {
 </li>
 <li>
 <p>Build the application jar file</p>
+<div class="paragraph">
+<p>On a <strong>Mac</strong> use the following commands</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code>$ cd &lt;location of your project&gt;
-$ ./mvnw clean package -DskipTests</code></pre>
+$ ./gradlew clean build -x test</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This creates a self-contained Jar file for the application in the <em>target</em> folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the <em>target</em> folder.</p>
+<p>On <strong>Windows</strong> use the following commands</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code>&gt; cd &lt;location of your project&gt;
+&gt; gradlew.bat clean build -x test</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Notice the <strong>-DskipTest</strong> argument which tells Maven that it should not run the unit tests. The reason we are using specifying this is because running the tests locally will fail because it will not be able to locate a local Redis repository.</p>
+<p>This creates a self-contained Jar file for the application in the <em>build/libs</em> folder. As an alternative, you can create the jar file within your IDE. For the purposes of this example, it is assumed that the location of the jar file is in the <em>build/libs</em> folder.</p>
+</div>
+<div class="paragraph">
+<p>Notice the <strong>-x test</strong> argument which tells Gradle that it should not run the unit tests. The reason we are using specifying this is because running the tests locally will fail because it will not be able to locate a local Redis repository.</p>
 </div>
 </li>
 <li>
 <p>Push the application using the following command line</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code>$ cf push spring-person --no-start --random-route -p target/Spring-Person-0.0.1-SNAPSHOT.jar
+<pre class="highlightjs highlight"><code>$ cf push spring-person --no-start --random-route -p build/libs/Spring-Person-0.0.1-SNAPSHOT.jar
 Creating app spring-person in org pivotal / space development as rross@pivotal.io...
 OK
 
@@ -1353,7 +1381,7 @@ applications:
 - name: spring-person
   memory: 1G
   random-route: true
-  path: target/Spring-Person-0.0.1-SNAPSHOT.jar
+  path: build/libs/Spring-Person-0.0.1-SNAPSHOT.jar
   services:
    - SpringPersonRedis</code></pre>
 </div>
@@ -1494,22 +1522,38 @@ applications:
 </li>
 <li>
 <p>Build the application jar file</p>
+<div class="paragraph">
+<p>On a Mac run the following commands:</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code>$ cd &lt;location of your project&gt;
-$ ./mvnw clean package -DskipTests</code></pre>
+$ ./gradlew clean build -x test</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>On Windows run the following commands</p>
 </div>
 </li>
-<li>
-<p>Push the application to Pivotal Cloud Foundry</p>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code>&gt; cd &lt;location of your project&gt;
+&gt; gradlew clean build -x test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>+
+. Push the application to Pivotal Cloud Foundry</p>
+</div>
+<div class="paragraph">
+<p>+</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code>$ cf push</code></pre>
 </div>
-</div>
-</li>
-</ol>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s hit a few of the endpoints that gave errors before.</p>
@@ -1575,6 +1619,8 @@ $ ./mvnw clean package -DskipTests</code></pre>
 <div class="paragraph">
 <p>This step requires that you have installed git on your computer. You will need to be able to create a local repository in order for this step to work.</p>
 </div>
+<div class="sect5">
+<h6 id="truefor-maven-projects-follow-these-instructions"><a class="anchor" href="#truefor-maven-projects-follow-these-instructions"></a>For Maven Projects follow these instructions:</h6>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1594,6 +1640,36 @@ $ ./mvnw clean package -DskipTests</code></pre>
 <li>
 <p>Save the file</p>
 </li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="truefor-gradle-projects-follow-these-instructions"><a class="anchor" href="#truefor-gradle-projects-follow-these-instructions"></a>For Gradle Projects follow these instructions:</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Edit the build.gradle file. It is located in the root folder of the project.</p>
+</li>
+<li>
+<p>Navigate down to the plugin section. Add the following snippet before the apply plugin section</p>
+<div class="listingblock">
+<div class="content">
+<pre>plugins {
+	id "com.gorylenko.gradle-git-properties" version "1.4.17"
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Save the file</p>
+</li>
+</ol>
+</div>
+<div class="sect5">
+<h6 id="trueediting-the-application-properties-file"><a class="anchor" href="#trueediting-the-application-properties-file"></a>Editing the application.properties File</h6>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>Edit the application.properties file. It is located in the src/main/resources folder.</p>
 </li>
@@ -1611,7 +1687,7 @@ $ ./mvnw clean package -DskipTests</code></pre>
 <p>These changes that we added to the project adds Git information to the /info endpoint. For additional details visit this <a href="http://docs.pivotal.io/pivotalcf/1-9/console/spring-boot-actuators.html#git-info">link</a></p>
 </div>
 <div class="paragraph">
-<p>By adding these configuration changes (specifically the git commit plugin XML) you are indicating that your application has a git repository. Since we have started from scratch, let&#8217;s create a git repository.</p>
+<p>By adding these configuration changes (specifically the git commit plugin) you are indicating that your application has a git repository. Since we have started from scratch, let&#8217;s create a git repository.</p>
 </div>
 <div class="paragraph">
 <p>Note: Failure to create a git repository will result in a build error.</p>
@@ -1629,7 +1705,7 @@ $ ./mvnw clean package -DskipTests</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code>$ git init
-$ git add .gitignore manifest.yml mvnw mvnw.cmd pom.xml src/
+$ git add .gitignore manifest.yml build.gradle gradlew gradlew.bat src/
 $ git commit -m 'Initial commit'</code></pre>
 </div>
 </div>
@@ -1637,11 +1713,15 @@ $ git commit -m 'Initial commit'</code></pre>
 </ol>
 </div>
 </div>
+</div>
 <div class="sect4">
 <h5 id="trueadding-additional-information-into-apps-manager"><a class="anchor" href="#trueadding-additional-information-into-apps-manager"></a>Adding Additional Information into Apps Manager</h5>
 <div class="paragraph">
 <p>Let&#8217;s make a few minor changes to our application to expose additional details.</p>
 </div>
+</div>
+<div class="sect4">
+<h5 id="truefor-maven-projects-follow-these-instructions-2"><a class="anchor" href="#truefor-maven-projects-follow-these-instructions-2"></a>For Maven Projects follow these instructions</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1712,6 +1792,33 @@ $ git commit -m 'Initial commit'</code></pre>
 <li>
 <p>Save the file</p>
 </li>
+</ol>
+</div>
+</div>
+<div class="sect4">
+<h5 id="truefor-gradle-projects-follow-these-instructions-2"><a class="anchor" href="#truefor-gradle-projects-follow-these-instructions-2"></a>For Gradle Projects follow these instructions</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Edit the build.gradle file. It is located in the root folder of the project</p>
+</li>
+<li>
+<p>Add the following snippet before the dependencies section</p>
+<div class="listingblock">
+<div class="content">
+<pre>springBoot  {
+    buildInfo()
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect4">
+<h5 id="trueediting-the-application-properties-file-2"><a class="anchor" href="#trueediting-the-application-properties-file-2"></a>Editing the application.properties file</h5>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>Edit the application.properties file. It is located in the src/main/resources folder.</p>
 </li>
@@ -1736,10 +1843,22 @@ info.app.version.spring=@spring.version@</pre>
 </li>
 <li>
 <p>Build the application jar file</p>
+<div class="paragraph">
+<p>On a <strong>Mac</strong> use the following commands:</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code>$ cd &lt;location of your project&gt;
-$ ./mvnw clean package -DskipTests</code></pre>
+$ ./gradlew clean build -x test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On <strong>Windows</strong> use the following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code>&gt; cd &lt;location of your project&gt;
+&gt; gradlew.bat clean build -x test</code></pre>
 </div>
 </div>
 </li>
@@ -1801,7 +1920,7 @@ $ ./mvnw clean package -DskipTests</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-03-06 04:56:20 EST
+Last updated 2017-03-24 13:56:16 EDT
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">
