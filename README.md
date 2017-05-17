@@ -24,7 +24,7 @@ Spring Boot features include:
 
 -   Ability to embed Tomcat, Jetty or Undertow making deployment much easier
 
--   Provide an oopinionated starter dependencies to simplify your configuration
+-   Provide an opinionated starter dependencies to simplify your configuration
 
 -   Automatically configures Spring whenever possible
 
@@ -41,17 +41,17 @@ Exploring Spring Boot
 
 2.  How do you find the documentation for a specific version of Spring Boot?
 
-Part 2: Spring Initializr
+Part 2: Spring Initializer
 =========================
 
-The easiest way to create your Spring Boot applications is to use [Spring Initialzr](http://start.spring.io). Spring Initializr makes is very easy to get started. It takes care of setting up your project by creating the necessary folder structure, the required project artifacts along with the dependencies and it creates a build file. By simply entering in some basic information, you can then download a Java project that is ready to be imported into your IDE of your choosing.
+The easiest way to create your Spring Boot applications is to use [Spring Initializer](http://start.spring.io). Spring Initializer makes is very easy to get started. It takes care of setting up your project by creating the necessary folder structure, the required project artifacts along with the dependencies and it creates a build file. By simply entering in some basic information, you can then download a Java project that is ready to be imported into your IDE of your choosing.
 
-Exploring Spring Initializr
+Exploring Spring Initializer
 ---------------------------
 
 1.  Go to [start.spring.io](http://start.spring.io) and explore.
 
-    ![spring initalizer 0](images/spring-initalizer-0.png)
+    ![spring initializer 0](images/spring-initalizer-0.png)
 
     Notice the various options that are available.
 
@@ -70,7 +70,7 @@ Exploring Spring Initializr
 Part 3: Creating the project
 ============================
 
-In this seciton we will start the process of creating the application we will use in this workshop.
+In this section we will start the process of creating the application we will use in this workshop.
 
 1.  Go to [start.spring.io](http://start.spring.io)
 
@@ -80,7 +80,7 @@ In this seciton we will start the process of creating the application we will us
 
     1.  Under Group, enter: **io.pivotal.demo** or something similar. This will be your Java package name
 
-    2.  Under Artitfact enter: **Spring-Person** or something similar. This will be the name of your Java App
+    2.  Under Artifact enter: **Spring-Person** or something similar. This will be the name of your Java App
 
         ![spring initializer 1](images/spring-initializer-1.png)
 
@@ -119,7 +119,7 @@ In this seciton we will start the process of creating the application we will us
 Importing into your IDE
 -----------------------
 
-1.  Uncompress the zip file to a location of your choosing. Make sure it keeps the folder structure. Remeber this location as we’ll need it shortly.
+1.  Uncompress the zip file to a location of your choosing. Make sure it keeps the folder structure. Remember this location as we’ll need it shortly.
 
 2.  Now start up your favorite Java IDE. Spring Tool Suite, IntelliJ and Eclipse are common choices.
 
@@ -292,7 +292,7 @@ The first step of enhancing our application is by adding a domain object. This o
 
 3.  Save the file
 
-Creating a Repostiory
+Creating a Repository
 ---------------------
 
 Next let’s create a repository to store the Person information from the Person class we created above.
@@ -444,7 +444,7 @@ Now that we have a domain object, and some sample data, the next step is to add 
 
 What does this class do? First, it defines a @RestController located at the /persons URI. When running, this means the URL would be <http://spring-persons-xxx.my-cf-domain.com/persons>.
 
-Inside of this class, the constructor is annotated with the @Autowired attribute which let’s Spring know it will be constructing this class on our behalf. That way, we can determine later what CrudRepository we want to use. In our case, we only have one implementation, but you could add a MySQL or HSQL or another implmentation at a later date if you wanted to.
+Inside of this class, the constructor is annotated with the @Autowired attribute which let’s Spring know it will be constructing this class on our behalf. That way, we can determine later what CrudRepository we want to use. In our case, we only have one implementation, but you could add a MySQL or HSQL or another implementation at a later date if you wanted to.
 
 Then we have various methods that are annotated with a specific @RequestMapping annotation that indicates when this method should be called. For example, in the case of the *Iterable* method, it returns a Iterator over a collection of Persons. Similarly there are other methods that allow you to find an person by email address (*getById()* using an HTTP GET), add a new person (*add()* using HTTP PUT), updating a person (*update()* using HTTP POST) and deleting a person (*deleteById()* using HTTP DELETE).
 
@@ -467,7 +467,7 @@ Before we deploy to cloud foundry there are a few things that need to occur.
 
         $ cf api https://api.sys.cloud.rick-ross.com --skip-ssl-validation
 
-3.  Login to Pivotal Cloudfoundry:
+3.  Login to Pivotal CloudFoundry:
 
         $ cf login
 
@@ -641,12 +641,12 @@ To make it easier to push updates to Pivotal Cloud Foundry, let’s create a man
 
         $ cf push
 
-5.  Open a browser and navigate to the /persons URL to verify the applicaiton is working
+5.  Open a browser and navigate to the /persons URL to verify the application is working
 
 Part 7: Testing the other REST endpoints (Optional)
 ---------------------------------------------------
 
-If you have curl installed, you can add, retrieve, update and delete records using the REST API that we created. The sections below walk you through the process of using those APIs. Note that the URLs in this seciton are using HTTP and not HTTPS.
+If you have curl installed, you can add, retrieve, update and delete records using the REST API that we created. The sections below walk you through the process of using those APIs. Note that the URLs in this section are using HTTP and not HTTPS.
 
 ### Adding a New Record
 
@@ -669,11 +669,11 @@ Part 8: Actuator
 
 Remember earlier, when we selected dependencies for this project? We chose the Actuator and Actuator Docs dependencies. In this section, we’ll explore what Actuators are and how to use them.
 
-One thing that all applicaitons have in common is the need to monitor and manage them.
+One thing that all applications have in common is the need to monitor and manage them.
 
 ### Actuator Endpoints
 
-Spring Boot includes a number of built-in actuator endpoints that enable you to montior and interact with your application. Most endpoints are exposed via HTTP although other methods are available.
+Spring Boot includes a number of built-in actuator endpoints that enable you to monitor and interact with your application. Most endpoints are exposed via HTTP although other methods are available.
 
 The most common endpoints are shown below:
 
@@ -735,7 +735,7 @@ Let’s hit a few of the endpoints that gave errors before.
 
 2.  What happens when you visit the /autoconfig endpoint?
 
-Try a few more of the endpoints and become familiar with the type of information they provide. Note that the output is in JSON format so using a JSON pretty printer like [this](http://jsonprettyprint.com) one is very helpful to make the output more readible.
+Try a few more of the endpoints and become familiar with the type of information they provide. Note that the output is in JSON format so using a JSON pretty printer like [this](http://jsonprettyprint.com) one is very helpful to make the output more readable.
 
 ### Actuator Integration with Pivotal Cloud Foundry
 
@@ -924,6 +924,8 @@ Let’s make a few minor changes to our application to expose additional details
 
     Notice the Spring Logo to the left of the application name. This indicates that Apps Manager has recognized this as a Spring Boot application.
 
+    > Make sure that the user trying to view the actuator dashboard has a `SpaceDeveloper` role. Otherwise you wouldn't be able to see the dashboard.
+
     If you followed the optional Git Information steps above, you’ll see at the top right, a Git Commit ID
 
     Expanding the arrow next to the left of each application instance reveals the health check details, showing you details like the Redis health along with other basic metrics.
@@ -935,5 +937,3 @@ Let’s make a few minor changes to our application to expose additional details
     Notice the additional entries for Git and Spring Boot information where you can view the JSON
 
     Note that currently some information is only shown if the Git information has been included.
-
-
