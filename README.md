@@ -74,7 +74,7 @@ In this section we will start the process of creating the application we will us
 
 1.  Go to [start.spring.io](http://start.spring.io)
 
-2.  Generate a **Gradle Project** with Spring Boot version **1.5.2**
+2.  Generate a **Gradle Project** with Spring Boot version **1.5.7**
 
 3.  In the Project Metadata section
 
@@ -235,7 +235,7 @@ Adding Domain Object
 
 The first step of enhancing our application is by adding a domain object. This object represents the information we want to store within a repository later on.
 
-1.  Create a new Java Class called **Person** in the **io.pivotal.demo.domain** package
+1.  Create a new Java Class called **Person** in the **io.pivotal.demo.SpringPerson.domain** package
 
 2.  This class will have 3 properties: firstName, lastName, and emailAddress. Use the following code snippet for the class:
 
@@ -297,13 +297,13 @@ Creating a Repository
 
 Next let’s create a repository to store the Person information from the Person class we created above.
 
-1.  Create a new Java Interface called **PersonRepository** in the **io.pivotal.demo.repository** package. This interface will extend the CrudRepository interface and Spring with provide an implementation with all of the necessary methods at runtime. Additional methods not provided by CrudRepository could be declared here as well, but that is not necessary for this example.
+1.  Create a new Java Interface called **PersonRepository** in the **io.pivotal.demo.SpringPerson.repository** package. This interface will extend the CrudRepository interface and Spring with provide an implementation with all of the necessary methods at runtime. Additional methods not provided by CrudRepository could be declared here as well, but that is not necessary for this example.
 
 2.  Use the snippet below to create the contents of this class:
 
         import org.springframework.data.repository.CrudRepository;
 
-        import io.pivotal.demo.domain.Person;
+        import io.pivotal.demo.SpringPerson.domain.Person;
 
         public interface PersonRepository extends CrudRepository<Person, String> {
 
@@ -322,19 +322,19 @@ In order to test our services, it would be helpful to have some data pre-populat
 
         [
             {
-                "_class": "io.pivotal.demo.domain.Person",
+                "_class": "io.pivotal.demo.SpringPerson.domain.Person",
                 "emailAddress" : "johndoe@nowhere.com",
                 "firstName" : "John",
                 "lastName" : "Doe"
             },
             {
-                "_class": "io.pivotal.demo.domain.Person",
+                "_class": "io.pivotal.demo.SpringPerson.domain.Person",
                 "emailAddress" : "jane@somewhere.com",
                 "firstName" : "Jane",
                 "lastName" : "Smith"
             },
             {
-                "_class": "io.pivotal.demo.domain.Person",
+                "_class": "io.pivotal.demo.SpringPerson.domain.Person",
                 "emailAddress" : "bobevans@someplace.com",
                 "firstName" : "Bob",
                 "lastName" : "Evans"
@@ -348,7 +348,7 @@ Creating a Repository Configuration
 
 We have created a repository and some data, but we need to tell Spring how to actually populate the repository with the file.
 
-1.  Create a new Java Class called **RepoConfig** in the **io.pivotal.demo.config** package
+1.  Create a new Java Class called **RepoConfig** in the **io.pivotal.demo.SpringPerson.config** package
 
 2.  Edit the contents of this file to contain the following:
 
@@ -385,13 +385,13 @@ Creating REST Endpoints
 
 Now that we have a domain object, and some sample data, the next step is to add REST endpoints that provide an API for manipulating the data.
 
-1.  Create a new Java Class called **PersonController** in the **io.pivotal.demo.controller** package
+1.  Create a new Java Class called **PersonController** in the **io.pivotal.demo.SpringPerson.controller** package
 
 2.  Edit the contents of this file to contain the following:
 
         import javax.validation.Valid;
 
-        import io.pivotal.demo.domain.Person;
+        import io.pivotal.demo.SpringPerson.domain.Person;
 
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.data.repository.CrudRepository;
